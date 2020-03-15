@@ -39,7 +39,7 @@ NUMROCKS = 80        # number of rocks
 NUMSOUNDS = 30    # number of sound objects
 SOUNDMINSPEED = 3 # slowest sound speed
 SOUNDMAXSPEED = 7 # fastest sound speed
-DIRCHANGEFREQ = 2    # % chance of direction change per frame
+DIRCHANGEFREQ = 10    # % chance of direction change per frame
 LEFT = 'left'
 RIGHT = 'right'
 
@@ -55,7 +55,7 @@ def main():
 
     # image files
     ROCKIMG = pygame.image.load('Rock.png')
-    PLAYER = pygame.image.load('Star.png')
+    PLAYERIMG = pygame.image.load('Star.png')
     SOUNDIMG = pygame.image.load('gem1.png')
 
     while True:
@@ -64,11 +64,11 @@ def main():
 
 def runGame():
     
-    invulnerableMode = False  # if the player is invulnerable
-    invulnerableStartTime = 0 # time the player became invulnerable
-    gameOverMode = False      # if the player has lost
-    gameOverStartTime = 0     # time the player lost
-    winMode = False           # if the player has won
+    invulnerableMode = False  # if the player has hit a rock
+    invulnerableStartTime = 0 
+    gameOverMode = False      
+    gameOverStartTime = 0     
+    winMode = False           
 
     
     gameOverSurf = BASICFONT.render('Game Over', True, WHITE)
@@ -83,7 +83,7 @@ def runGame():
     winRect2 = winSurf2.get_rect()
     winRect2.center = (HALF_WINWIDTH, HALF_WINHEIGHT + 30)
 
-    # camerax and cameray are the top left of where the camera view is
+    # the top left of where the camera view is
     camerax = 0
     cameray = 0
 
@@ -91,7 +91,7 @@ def runGame():
     soundObjs = [] # stores all the sound objects
 
     # stores the player object:
-    playerObj = {'surface': PLAYER,
+    playerObj = {'surface': PLAYERIMG,
                  'size': PLAYERSIZE,
                  'x': HALF_WINWIDTH,
                  'y': HALF_WINHEIGHT,
@@ -109,7 +109,7 @@ def runGame():
         rockObjs[i]['y'] = random.randint(0, WINHEIGHT)
 
     while True: # main game loop
-        # Check if invulnerability
+        
         if invulnerableMode and time.time() - invulnerableStartTime > INVULNTIME:
             invulnerableMode = False
 
@@ -118,13 +118,13 @@ def runGame():
             sObj['x'] += sObj['movex']
             sObj['y'] += sObj['movey']
 
-            # random chance they change direction
+            # change direction
             if random.randint(0, 99) < DIRCHANGEFREQ:
                 sObj['movex'] = getRandomVelocity()
                 sObj['movey'] = getRandomVelocity()
 
 
-        # see if need to delete objects
+        # see if need to delete objects off camera
         for i in range(len(rockObjs) - 1, -1, -1):
             if isOutsideActiveArea(camerax, cameray, rockObjs[i]):
                 del rockObjs[i]
@@ -133,14 +133,15 @@ def runGame():
                 del soundObjs[i]
 
         # add more rocks and sounds if not enough
-        while len(rockObjs) < 5:
+        while len(rockObjs) < NUMROCKS:
             rockObjs.append(makeNewRocks(camerax, cameray))
         while len(soundObjs) < NUMSOUNDS:
             soundObjs.append(makeNewSounds(camerax, cameray))
 
         # adjust camerax and cameray if beyond the "camera slack"
-        playerCenterx = HALF_WINWIDTH
-        playerCentery = HALF_WINHEIGHT
+        playerCenterx = playerObj['x'] + int(playerObj['size'] / 2)
+        playerCentery = playerObj['y'] + int(playerObj['size'] / 2)
+        
         if (camerax + HALF_WINWIDTH) - playerCenterx > CAMERASLACK:
             camerax = playerCenterx + CAMERASLACK - HALF_WINWIDTH
         elif playerCenterx - (camerax + HALF_WINWIDTH) > CAMERASLACK:
@@ -150,28 +151,28 @@ def runGame():
         elif playerCentery - (cameray + HALF_WINHEIGHT) > CAMERASLACK:
             cameray = playerCentery - CAMERASLACK - HALF_WINHEIGHT
 
-        # draw the background
+        # background
         DISPLAYSURF.fill(BGCOLOR)
 
-        # draw all the rocks
+        # rocks
         for rObj in rockObjs:
             rRect = pygame.Rect( (rObj['x'] - camerax,
                                   rObj['y'] - cameray,
                                   rObj['width'],
                                   rObj['height']) )
-            DISPLAYSURF.blit(ROCKIMG, rRect)
+            DISPLAYSURF.blit(rockObjs['surface'], rRect)
 
 
-        # draw the sound objs
+        # sound objs
         for sObj in soundObjs:
             sRect = pygame.Rect( (sObj['x'] - camerax,
                                   sObj['y'] - cameray,
                                   sObj['width'],
                                   sObj['height']) )
-            DISPLAYSURF.blit(SOUNDIMG, sRect)
+            DISPLAYSURF.blit(soundObjs['surface'], sRect)
 
 
-        # draw the player
+        # player
         flashIsOn = round(time.time(), 1) * 10 % 2 == 1
         if not gameOverMode and not (invulnerableMode and flashIsOn):
             playerObj['rect'] = pygame.Rect( (playerObj['x'] - camerax,
@@ -181,7 +182,7 @@ def runGame():
             DISPLAYSURF.blit(playerObj['surface'], playerObj['rect'])
 
 
-        # draw the health meter
+        # health meter
         drawHealthMeter(playerObj['health'])
 
         for event in pygame.event.get(): # event handling loop
@@ -230,13 +231,13 @@ def runGame():
                 playerObj['y'] += MOVERATE
 
             # check if the player has collided with any soundobjs and delete
-            for i in range(len(soundObjs)-1, -1, -1):
+            for i in range(len(soundObjs) - 1, -1, -1):
                 soObj = soundObjs[i]
                 if 'rect' in soObj and playerObj['rect'].colliderect(soObj['rect']):
-                    del soundObjs[i]
+                    del soObj[i]
 
             # check if player has hit rock
-            for i in range(len(rockObjs)-1, -1, -1):
+            for i in range(len(rockObjs) - 1, -1, -1):
                 roObj = rockObjs[i]
                 if 'rect' in roObj and playerObj['rect'].colliderect(roObj['rect']):
                     # player takes damage
@@ -244,7 +245,7 @@ def runGame():
                     invulnerableStartTime = time.time()
                     playerObj['health'] -= 1
                     if playerObj['health'] == 0:
-                        gameOverMode = True # turn on "game over mode"
+                        gameOverMode = True 
                         gameOverStartTime = time.time()
         else:
             # show "game over" text
@@ -289,8 +290,6 @@ def getRandomOffCameraPos(camerax, cameray, objWidth, objHeight):
     while True:
         x = random.randint(camerax - WINWIDTH, camerax + (2 * WINWIDTH))
         y = random.randint(cameray - WINHEIGHT, cameray + (2 * WINHEIGHT))
-        # create a Rect object with the random coordinates and use colliderect()
-        # to make sure the right edge isn't in the camera view.
         objRect = pygame.Rect(x, y, objWidth, objHeight)
         if not objRect.colliderect(cameraRect):
             return x, y
@@ -318,8 +317,6 @@ def makeNewRocks(camerax, cameray):
 
 
 def isOutsideActiveArea(camerax, cameray, obj):
-    # Return False if camerax and cameray are more than
-    # a half-window length beyond the edge of the window.
     boundsLeftEdge = camerax - WINWIDTH
     boundsTopEdge = cameray - WINHEIGHT
     boundsRect = pygame.Rect(boundsLeftEdge, boundsTopEdge, WINWIDTH * 3, WINHEIGHT * 3)
