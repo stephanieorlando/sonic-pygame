@@ -15,6 +15,10 @@
 # can eat one or both, will affect the sound that is produced
 # two compositions can also work simultaneously, will contrast somehow?
 
+# currently working on: ideal number of rocks/soundObjs and speed
+# considering removing KEYUP so the player is constantly moving
+# basically want it to be enough of a challenge that it's engaging
+
 import random, sys, time, math, pygame
 from pygame.locals import *
 
@@ -29,23 +33,23 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 
 CAMERASLACK = 90     
-MOVERATE = 9         # how fast the player moves
+MOVERATE = 12         # how fast the player moves
 INVULNTIME = 2       # how long the player is invulnerable after being hit in seconds
 GAMEOVERTIME = 4     # how long the "game over" text stays on the screen in seconds
 MAXHEALTH = 3        # how much health the player starts with
-PLAYERSIZE = 25
+PLAYERSIZE = 10
 
-NUMROCKS = 80        # number of rocks
-NUMSOUNDS = 30    # number of sound objects
-SOUNDMINSPEED = 3 # slowest sound speed
-SOUNDMAXSPEED = 7 # fastest sound speed
+NUMROCKS = 75        # number of rocks
+NUMSOUNDS = 35    # number of sound objects
+SOUNDMINSPEED = 5 # slowest sound speed
+SOUNDMAXSPEED = 10 # fastest sound speed
 DIRCHANGEFREQ = 10    # % chance of direction change per frame
 LEFT = 'left'
 RIGHT = 'right'
 
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROCKIMG, PLAYERIMG, SOUNDIMG
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROCKIMG, PLAYERIMG, PLAYERSIZE, SOUNDIMG
 
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
