@@ -68,26 +68,24 @@ def runGame():
     invulnerableStartTime = 0 
     gameOverMode = False      
     gameOverStartTime = 0     
-    winMode = False           
+    winMode = False
 
-<<<<<<< Updated upstream:basic
-    
-    gameOverSurf = BASICFONT.render('Game Over', True, WHITE)
+    # game over screen
+    gameOverSurf = BASICFONT.render('try again', True, WHITE)
     gameOverRect = gameOverSurf.get_rect()
     gameOverRect.center = (HALF_WINWIDTH, HALF_WINHEIGHT)
 
-    winSurf = BASICFONT.render('WIN', True, WHITE)
+    # win screen
+    winSurf = BASICFONT.render('nice', True, WHITE)
     winRect = winSurf.get_rect()
     winRect.center = (HALF_WINWIDTH, HALF_WINHEIGHT)
 
-    winSurf2 = BASICFONT.render('(Press "r" to restart.)', True, WHITE)
-    winRect2 = winSurf2.get_rect()
-    winRect2.center = (HALF_WINWIDTH, HALF_WINHEIGHT + 30)
+    # restart screen
+    restartSurf = BASICFONT.render('press r to restart', True, WHITE)
+    restartSurf = restartSurf.get_rect()
+    restartSurf.center = (HALF_WINWIDTH, HALF_WINHEIGHT + 30)
 
-    # the top left of where the camera view is
-=======
-    # the top left camera view
->>>>>>> Stashed changes:basic_fns.py
+    # top left camera corner
     camerax = 0
     cameray = 0
 
@@ -235,38 +233,32 @@ def runGame():
                 playerObj['y'] += MOVERATE
 
             # check if the player has collided with any soundobjs and delete
-            for i in range(len(soundObjs) - 1, -1, -1):
+            for i in range(len(soundObjs)-1, -1, -1):
                 soObj = soundObjs[i]
                 if 'rect' in soObj and playerObj['rect'].colliderect(soObj['rect']):
-                    del soObj[i]
+                    del soundObjs[i]
 
             # check if player has hit rock
-            for i in range(len(rockObjs) - 1, -1, -1):
+            for i in range(len(rockObjs)-1, -1, -1):
                 roObj = rockObjs[i]
                 if 'rect' in roObj and playerObj['rect'].colliderect(roObj['rect']):
-                    # player takes damage
-                    invulnerableMode = True
-                    invulnerableStartTime = time.time()
-                    playerObj['health'] -= 1
-                    if playerObj['health'] == 0:
-                        gameOverMode = True 
-                        gameOverStartTime = time.time()
+                    if not invulnerableMode:
+                        # player takes damage
+                        invulnerableMode = True
+                        invulnerableStartTime = time.time()
+                        playerObj['health'] -= 1
+                        if playerObj['health'] == 0:
+                            gameOverMode = True 
+                            gameOverStartTime = time.time()
         else:
-<<<<<<< Updated upstream:basic
-            # show "game over" text
+            # show game over screen
             DISPLAYSURF.blit(gameOverSurf, gameOverRect)
             if time.time() - gameOverStartTime > GAMEOVERTIME:
-                return # end the current game
+                return # end of game
 
-        # check if the player has won
         if winMode:
             DISPLAYSURF.blit(winSurf, winRect)
-            DISPLAYSURF.blit(winSurf2, winRect2)
-=======
-            DISPLAYSURF.fill(WHITE)
-            pygame.time.wait(1000)
-            return # end the current game
->>>>>>> Stashed changes:basic_fns.py
+            DISPLAYSURF.blit(restartSurf, restartRect)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
