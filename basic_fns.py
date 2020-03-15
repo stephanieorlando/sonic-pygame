@@ -93,6 +93,8 @@ def runGame():
     camerax = 0
     cameray = 0
 
+    score = 0
+
     rockObjs = []    
     soundObjs = [] 
 
@@ -237,16 +239,12 @@ def runGame():
                 playerObj['y'] += MOVERATE
 
             # check if the player has collided with any soundobjs and delete
-            score = 0
-            
             for i in range(len(soundObjs)-1, -1, -1):
                 soObj = soundObjs[i]
                 if 'rect' in soObj and playerObj['rect'].colliderect(soObj['rect']):
-                    score += 1
                     del soundObjs[i]
-                    winMode = True
-                    
-                    if score == 3:
+                    score += 1
+                    if score == 5:
                         winMode = True
 
             # check if player has hit rock
