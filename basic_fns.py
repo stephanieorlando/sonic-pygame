@@ -19,7 +19,7 @@
 # considering removing KEYUP so the player is constantly moving
 # basically want it to be enough of a challenge that it's engaging
 
-import random, sys, time, math, pygame
+import random, sys, time, pygame
 from pygame.locals import *
 
 FPS = 30 
@@ -32,15 +32,15 @@ BGCOLOR = (128, 128, 128)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 
-CAMERASLACK = 90     
-MOVERATE = 12         # how fast the player moves
+CAMERASLACK = 75     
+MOVERATE = 8         # how fast the player moves
 INVULNTIME = 2       # how long the player is invulnerable after being hit in seconds
 GAMEOVERTIME = 4     # how long the "game over" text stays on the screen in seconds
 MAXHEALTH = 3        # how much health the player starts with
-PLAYERSIZE = 10
+PLAYERSIZE = 20
 
-NUMROCKS = 75        # number of rocks
-NUMSOUNDS = 35    # number of sound objects
+NUMROCKS = 50        # number of rocks
+NUMSOUNDS = 30    # number of sound objects
 SOUNDMINSPEED = 5 # slowest sound speed
 SOUNDMAXSPEED = 10 # fastest sound speed
 DIRCHANGEFREQ = 10    # % chance of direction change per frame
@@ -68,7 +68,7 @@ def main():
 
 def runGame():
     
-    invulnerableMode = False  # if the player hits a rock
+    invulnerableMode = False
     invulnerableStartTime = 0 
     gameOverMode = False      
     gameOverStartTime = 0     
@@ -98,7 +98,7 @@ def runGame():
     rockObjs = []    
     soundObjs = [] 
 
-    # stores the player object:
+    # player dictionary
     playerObj = {'surface': PLAYERIMG,
                  'size': PLAYERSIZE,
                  'x': HALF_WINWIDTH,
@@ -107,7 +107,7 @@ def runGame():
 
     moveLeft  = False
     moveRight = False
-    moveUp    = False
+    moveUp    = True
     moveDown  = False
 
     # start off with some random rocks on the screen
@@ -120,6 +120,8 @@ def runGame():
         
         if invulnerableMode and time.time() - invulnerableStartTime > INVULNTIME:
             invulnerableMode = False
+        elif winMode:
+            invulnerableMode = True
 
         # move all the sounds
         for sObj in soundObjs:
@@ -213,16 +215,16 @@ def runGame():
                 elif winMode and event.key == K_r:
                     return
 
-            elif event.type == KEYUP:
+            #elif event.type == KEYUP:
                 # stop moving the player
-                if event.key in (K_LEFT, K_a):
-                    moveLeft = False
-                elif event.key in (K_RIGHT, K_d):
-                    moveRight = False
-                elif event.key in (K_UP, K_w):
-                    moveUp = False
-                elif event.key in (K_DOWN, K_s):
-                    moveDown = False
+                #if event.key in (K_LEFT, K_a):
+                    #moveLeft = False
+                #elif event.key in (K_RIGHT, K_d):
+                    #moveRight = False
+                #elif event.key in (K_UP, K_w):
+                    #moveUp = False
+                #elif event.key in (K_DOWN, K_s):
+                    #moveDown = False
 
                 elif event.key == K_ESCAPE:
                     terminate()
@@ -267,6 +269,7 @@ def runGame():
                 return # end of game
 
         if winMode:
+            gameOverMode = False
             DISPLAYSURF.blit(winSurf, winRect)
             DISPLAYSURF.blit(restartSurf, restartRect)
 
