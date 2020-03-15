@@ -70,19 +70,6 @@ def runGame():
     gameOverStartTime = 0     
     winMode = False           
 
-    
-    gameOverSurf = BASICFONT.render('Game Over', True, WHITE)
-    gameOverRect = gameOverSurf.get_rect()
-    gameOverRect.center = (HALF_WINWIDTH, HALF_WINHEIGHT)
-
-    winSurf = BASICFONT.render('WIN', True, WHITE)
-    winRect = winSurf.get_rect()
-    winRect.center = (HALF_WINWIDTH, HALF_WINHEIGHT)
-
-    winSurf2 = BASICFONT.render('(Press "r" to restart.)', True, WHITE)
-    winRect2 = winSurf2.get_rect()
-    winRect2.center = (HALF_WINWIDTH, HALF_WINHEIGHT + 30)
-
     # the top left of where the camera view is
     camerax = 0
     cameray = 0
@@ -90,7 +77,7 @@ def runGame():
     rockObjs = []    # stores all the rock objects
     soundObjs = [] # stores all the sound objects
 
-    # stores the player object:
+    # playerObj dictionary
     playerObj = {'surface': PLAYERIMG,
                  'size': PLAYERSIZE,
                  'x': HALF_WINWIDTH,
@@ -231,13 +218,13 @@ def runGame():
                 playerObj['y'] += MOVERATE
 
             # check if the player has collided with any soundobjs and delete
-            for i in range(len(soundObjs) - 1, -1, -1):
+            for i in range(len(soundObjs)-1, -1, -1):
                 soObj = soundObjs[i]
                 if 'rect' in soObj and playerObj['rect'].colliderect(soObj['rect']):
-                    del soObj[i]
+                    del soundObjs[i]
 
             # check if player has hit rock
-            for i in range(len(rockObjs) - 1, -1, -1):
+            for i in range(len(rockObjs)-1, -1, -1):
                 roObj = rockObjs[i]
                 if 'rect' in roObj and playerObj['rect'].colliderect(roObj['rect']):
                     # player takes damage
@@ -248,15 +235,7 @@ def runGame():
                         gameOverMode = True 
                         gameOverStartTime = time.time()
         else:
-            # show "game over" text
-            DISPLAYSURF.blit(gameOverSurf, gameOverRect)
-            if time.time() - gameOverStartTime > GAMEOVERTIME:
-                return # end the current game
-
-        # check if the player has won
-        if winMode:
-            DISPLAYSURF.blit(winSurf, winRect)
-            DISPLAYSURF.blit(winSurf2, winRect2)
+            return # end the current game
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
