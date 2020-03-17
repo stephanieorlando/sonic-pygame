@@ -19,9 +19,6 @@
 # considering removing KEYUP so the player is constantly moving
 # basically want it to be enough of a challenge that it's engaging
 
-# experiment with different values for cameraslack?
-# remove direction down
-
 import random, sys, time, pygame
 from pygame.locals import *
 
@@ -33,7 +30,7 @@ HALF_WINHEIGHT = int(WINHEIGHT / 2)
 
 BGCOLOR = (255, 255, 255, 0)
 WHITE = (255, 255, 255)
-PURPLE = (178, 102, 255)
+PURPLE = (200, 162, 200)
 
 CAMERASLACK = 75     
 MOVERATE = 8         # how fast the player moves
