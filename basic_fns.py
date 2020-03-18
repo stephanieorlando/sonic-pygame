@@ -61,10 +61,14 @@ def main():
     BASICFONT = pygame.font.Font('freesansbold.ttf', 32)
 
     # image files
-    ROCKIMG = pygame.image.load('Rock.png')
+    ROCKIMG = pygame.image.load('Blackhole.png')
     PLAYERIMG = pygame.image.load('Star.png')
-    SOUNDIMG = pygame.image.load('gem1.png')
+    SOUNDIMG = pygame.image.load('Star3.png')
     BGIMAGE = pygame.image.load('gradient.png')
+
+
+    SOUNDIMG = pygame.transform.smoothscale(SOUNDIMG, (85, 85))
+    ROCKIMG = pygame.transform.smoothscale(ROCKIMG, (85, 85))
 
     while True:
         runGame()
@@ -317,11 +321,9 @@ def getRandomOffCameraPos(camerax, cameray, objWidth, objHeight):
 
 def makeNewSounds(camerax, cameray):
     so = {}
-    generalSize = random.randint(5, 25)
-    multiplier = random.randint(1, 3)
     so['surface'] = SOUNDIMG
-    so['width']  = (generalSize + random.randint(0, 10)) * multiplier
-    so['height'] = (generalSize + random.randint(0, 10)) * multiplier
+    so['width']  = SOUNDIMG.get_width()
+    so['height'] = SOUNDIMG.get_height()
     so['x'], so['y'] = getRandomOffCameraPos(camerax, cameray, so['width'], so['height'])
     so['movex'] = getRandomVelocity()
     so['movey'] = getRandomVelocity()
