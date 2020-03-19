@@ -16,11 +16,11 @@
 # two compositions can also work simultaneously, will contrast somehow?
 
 # currently working on: ideal number of rocks/soundObjs and speed
-# considering removing KEYUP so the player is constantly moving
 # basically want it to be enough of a challenge that it's engaging
-
 # experiment with different values for cameraslack?
-# remove direction down
+
+# thinking of removing 'lives' instead hitting an obstacle will change a parameter and possibly trigger a sample to stop
+
 
 import random, sys, time, pygame
 from pygame.locals import *
@@ -42,8 +42,8 @@ GAMEOVERTIME = 4     # how long the "game over" text stays on the screen in seco
 MAXHEALTH = 3        # how much health the player starts with
 PLAYERSIZE = 20
 
-NUMROCKS = 50        # number of rocks
-NUMSOUNDS = 30    # number of sound objects
+NUMROCKS = 45        # number of rocks
+NUMSOUNDS = 13    # number of sound objects
 SOUNDMINSPEED = 5 # slowest sound speed
 SOUNDMAXSPEED = 10 # fastest sound speed
 DIRCHANGEFREQ = 10    # % chance of direction change per frame
@@ -52,23 +52,24 @@ RIGHT = 'right'
 
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROCKIMG, PLAYERIMG, SOUNDIMG, BGIMAGE
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROCKIMAGES, R_PLAYERIMG, L_PLAYERIMG, SOUNDIMG, BGIMAGE
 
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINWIDTH, WINHEIGHT))
-    pygame.display.set_caption('Sound Objects')
+    pygame.display.set_caption('Sounding Stars')
     BASICFONT = pygame.font.Font('freesansbold.ttf', 32)
 
     # image files
-    ROCKIMG = pygame.image.load('Blackhole.png')
-    PLAYERIMG = pygame.image.load('Star.png')
+    R_PLAYERIMG = pygame.image.load('Arrow.png')
+    L_PLAYERIMG = pygame.transform.flip(R_PLAYERIMG, True, False)
     SOUNDIMG = pygame.image.load('Star3.png')
-    BGIMAGE = pygame.image.load('gradient.png')
-
-
     SOUNDIMG = pygame.transform.smoothscale(SOUNDIMG, (85, 85))
-    ROCKIMG = pygame.transform.smoothscale(ROCKIMG, (85, 85))
+    BGIMAGE = pygame.image.load('gradient.png')
+    ROCKIMAGES = []
+    for i in range(1,5):
+        ROCKIMAGES.append(pygame.image.load('blackhole%s.png' % i))
+    
 
     while True:
         runGame()
@@ -81,6 +82,17 @@ def runGame():
     gameOverMode = False      
     gameOverStartTime = 0     
     winMode = False
+    startMode = True
+
+    # start game screen
+    startSurf = BASICFONT.render('catch the stars', True, WHITE)
+    startRect = startSurf.get_rect()
+    startRect.center = (HALF_WINWIDTH - 150, HALF_WINHEIGHT - 75)
+
+    # obstacles screen
+    obstSurf = BASICFONT.render('don\'t hit the black holes', True, WHITE)
+    obstRect = obstSurf.get_rect()
+    obstRect.center = (HALF_WINWIDTH + 50, HALF_WINHEIGHT + 50)
 
     # game over screen
     gameOverSurf = BASICFONT.render('try again', True, WHITE)
@@ -104,10 +116,11 @@ def runGame():
     score = 0
 
     rockObjs = []    
-    soundObjs = [] 
+    soundObjs = []
 
     # player dictionary
-    playerObj = {'surface': PLAYERIMG,
+    playerObj = {'surface': R_PLAYERIMG,
+                 'facing': RIGHT,
                  'size': PLAYERSIZE,
                  'x': HALF_WINWIDTH,
                  'y': HALF_WINHEIGHT,
@@ -119,10 +132,10 @@ def runGame():
     moveDown  = False
 
     # start off with some random rocks on the screen
-    for i in range(10):
-        rockObjs.append(makeNewRocks(camerax, cameray))
-        rockObjs[i]['x'] = random.randint(0, WINWIDTH)
-        rockObjs[i]['y'] = random.randint(0, WINHEIGHT)
+    #for i in range(10):
+        #rockObjs.append(makeNewRocks(camerax, cameray))
+        #rockObjs[i]['x'] = random.randint(0, WINWIDTH)
+        #rockObjs[i]['y'] = random.randint(0, WINHEIGHT)
 
     while True: # main game loop
         
@@ -180,7 +193,7 @@ def runGame():
                                          rObj['y'] - cameray,
                                          rObj['width'],
                                          rObj['height']) )
-            DISPLAYSURF.blit(ROCKIMG, rObj['rect'])
+            DISPLAYSURF.blit(ROCKIMAGES[rObj['blackholeImage']], rObj['rect'])
 
 
         # sound objs
@@ -213,15 +226,21 @@ def runGame():
                 if event.key in (K_UP, K_w):
                     moveDown = False
                     moveUp = True
-                elif event.key in (K_DOWN, K_s):
-                    moveUp = False
-                    moveDown = True
+                #elif event.key in (K_DOWN, K_s):
+                    #moveUp = False
+                    #moveDown = True
                 elif event.key in (K_LEFT, K_a):
                     moveRight = False
                     moveLeft = True
+                    if playerObj['facing'] != LEFT: # change image L
+                        playerObj['surface'] = L_PLAYERIMG
+                    playerObj['facing'] = LEFT
                 elif event.key in (K_RIGHT, K_d):
                     moveLeft = False
                     moveRight = True
+                    if playerObj['facing'] != RIGHT: # change image R
+                        playerObj['surface'] = R_PLAYERIMG
+                    playerObj['facing'] = RIGHT
                 elif winMode and event.key == K_r:
                     return
 
@@ -256,6 +275,12 @@ def runGame():
                 if 'rect' in soObj and playerObj['rect'].colliderect(soObj['rect']):
                     del soundObjs[i]
                     score += 1
+
+                    if playerObj['facing'] == LEFT:
+                        playerObj['surface'] = L_PLAYERIMG
+                    if playerObj['facing'] == RIGHT:
+                        playerObj['surface'] = R_PLAYERIMG
+                    
                     if score == 5:
                         winMode = True
 
@@ -306,7 +331,7 @@ def getRandomVelocity():
     if random.randint(0, 1) == 0:
         return speed
     else:
-        return -speed
+        return speed
 
 
 def getRandomOffCameraPos(camerax, cameray, objWidth, objHeight):
@@ -332,9 +357,10 @@ def makeNewSounds(camerax, cameray):
 
 def makeNewRocks(camerax, cameray):
     ro = {}
-    ro['surface'] = ROCKIMG
-    ro['width']  = ROCKIMG.get_width()
-    ro['height'] = ROCKIMG.get_height()
+    ro['blackholeImage'] = random.randint(0, len(ROCKIMAGES) - 1)
+    ro['surface'] = ROCKIMAGES
+    ro['width']  = ROCKIMAGES[0].get_width()
+    ro['height'] = ROCKIMAGES[0].get_height()
     ro['x'], ro['y'] = getRandomOffCameraPos(camerax, cameray, ro['width'], ro['height'])
     ro['rect'] = pygame.Rect( (ro['x'], ro['y'], ro['width'], ro['height']) )
     return ro
