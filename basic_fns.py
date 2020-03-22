@@ -39,20 +39,23 @@ CAMERASLACK = 75
 MOVERATE = 8         # how fast the player moves
 INVULNTIME = 2       # how long the player is invulnerable after being hit in seconds
 GAMEOVERTIME = 4     # how long the "game over" text stays on the screen in seconds
-MAXHEALTH = 3        # how much health the player starts with
+STARTSCREENTIME = 2  # how long the start instructions stay on the screen
+STARTHEALTH = 3      # how much health the player starts with
+MAXHEALTH = 10       # how much health to win game
 PLAYERSIZE = 20
 
-NUMROCKS = 45        # number of rocks
-NUMSOUNDS = 13    # number of sound objects
-SOUNDMINSPEED = 5 # slowest sound speed
+NUMROCKS = 45      # number of rocks
+NUMSOUNDS = 10     # number of sound objects
+SOUNDMINSPEED = 5  # slowest sound speed
 SOUNDMAXSPEED = 10 # fastest sound speed
-DIRCHANGEFREQ = 10    # % chance of direction change per frame
+
+UP = 'up'
 LEFT = 'left'
 RIGHT = 'right'
 
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROCKIMAGES, R_PLAYERIMG, L_PLAYERIMG, SOUNDIMG, BGIMAGE
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROCKIMAGES, PLAYERIMG, R_PLAYERIMG, L_PLAYERIMG, SOUNDIMG, BGIMAGE
 
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
@@ -61,7 +64,8 @@ def main():
     BASICFONT = pygame.font.Font('freesansbold.ttf', 32)
 
     # image files
-    R_PLAYERIMG = pygame.image.load('Arrow.png')
+    PLAYERIMG = pygame.image.load('Arrow.png')
+    R_PLAYERIMG = pygame.image.load('Arrow_r.png')
     L_PLAYERIMG = pygame.transform.flip(R_PLAYERIMG, True, False)
     SOUNDIMG = pygame.image.load('Star3.png')
     SOUNDIMG = pygame.transform.smoothscale(SOUNDIMG, (85, 85))
@@ -83,6 +87,7 @@ def runGame():
     gameOverStartTime = 0     
     winMode = False
     startMode = True
+    startTime = time.time()
 
     # start game screen
     startSurf = BASICFONT.render('catch the stars', True, WHITE)
@@ -113,18 +118,16 @@ def runGame():
     camerax = 0
     cameray = 0
 
-    score = 0
-
     rockObjs = []    
     soundObjs = []
 
     # player dictionary
-    playerObj = {'surface': R_PLAYERIMG,
-                 'facing': RIGHT,
+    playerObj = {'surface': PLAYERIMG,
+                 'facing': UP,
                  'size': PLAYERSIZE,
                  'x': HALF_WINWIDTH,
                  'y': HALF_WINHEIGHT,
-                 'health': MAXHEALTH}
+                 'health': STARTHEALTH}
 
     moveLeft  = False
     moveRight = False
@@ -148,12 +151,6 @@ def runGame():
         for sObj in soundObjs:
             sObj['x'] += sObj['movex']
             sObj['y'] += sObj['movey']
-
-            # change direction
-            if random.randint(0, 99) < DIRCHANGEFREQ:
-                sObj['movex'] = getRandomVelocity()
-                sObj['movey'] = getRandomVelocity()
-
 
         # see if need to delete objects off camera
         for i in range(len(rockObjs) - 1, -1, -1):
@@ -224,8 +221,11 @@ def runGame():
 
             elif event.type == KEYDOWN:
                 if event.key in (K_UP, K_w):
-                    moveDown = False
-                    moveUp = True
+                    moveRight = False
+                    moveLeft = False
+                    if playerObj['facing'] != UP: # change image UP
+                        playerObj['surface'] = PLAYERIMG
+                    playerObj['facing'] = UP
                 #elif event.key in (K_DOWN, K_s):
                     #moveUp = False
                     #moveDown = True
@@ -274,14 +274,17 @@ def runGame():
                 soObj = soundObjs[i]
                 if 'rect' in soObj and playerObj['rect'].colliderect(soObj['rect']):
                     del soundObjs[i]
-                    score += 1
+                    if not winMode:
+                        playerObj['health'] += 1
 
+                    if playerObj['facing'] == UP:
+                        playerObj['surface'] = PLAYERIMG
                     if playerObj['facing'] == LEFT:
                         playerObj['surface'] = L_PLAYERIMG
                     if playerObj['facing'] == RIGHT:
                         playerObj['surface'] = R_PLAYERIMG
                     
-                    if score == 5:
+                    if playerObj['health'] == MAXHEALTH:
                         winMode = True
 
             # check if player has hit rock
@@ -292,7 +295,9 @@ def runGame():
                         # player takes damage
                         invulnerableMode = True
                         invulnerableStartTime = time.time()
-                        playerObj['health'] -= 1
+                        if not winMode:
+                            playerObj['health'] -= 1
+
                         if playerObj['health'] == 0:
                             gameOverMode = True 
                             gameOverStartTime = time.time()
@@ -302,6 +307,13 @@ def runGame():
             DISPLAYSURF.blit(gameOverSurf, gameOverRect)
             if time.time() - gameOverStartTime > GAMEOVERTIME:
                 return # end of game
+
+        if startMode:
+            DISPLAYSURF.blit(startSurf, startRect)
+            DISPLAYSURF.blit(obstSurf, obstRect)
+
+        if time.time() - startTime > STARTSCREENTIME:
+            startMode = False
 
         if winMode:
             gameOverMode = False
@@ -331,7 +343,7 @@ def getRandomVelocity():
     if random.randint(0, 1) == 0:
         return speed
     else:
-        return speed
+        return -speed
 
 
 def getRandomOffCameraPos(camerax, cameray, objWidth, objHeight):
@@ -351,7 +363,7 @@ def makeNewSounds(camerax, cameray):
     so['height'] = SOUNDIMG.get_height()
     so['x'], so['y'] = getRandomOffCameraPos(camerax, cameray, so['width'], so['height'])
     so['movex'] = getRandomVelocity()
-    so['movey'] = getRandomVelocity()
+    so['movey'] = abs(getRandomVelocity())
     return so
 
 
