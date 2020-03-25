@@ -353,10 +353,9 @@ def runGame():
         elif playerObj['health'] == 7:
             sonic_pi.send_message("/trigger/ring", [1, 0.96, 0.35])
             sonic_pi.send_message("/trigger/rtms_2", 0)
-        elif playerObj['health'] == 8:
+        elif playerObj['health'] == 9:
             sonic_pi.send_message("/trigger/ring", [0, 0.98, 0.25])
-        elif playerObj['health'] in range(8, 12):
-            sonic_pi.send_message("/trigger/M3", 1)
+
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
