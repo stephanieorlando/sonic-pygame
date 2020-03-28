@@ -36,6 +36,7 @@ WINWIDTH = 640
 WINHEIGHT = 480 
 HALF_WINWIDTH = int(WINWIDTH / 2)
 HALF_WINHEIGHT = int(WINHEIGHT / 2)
+QUARTER_WINHEIGHT = int(WINHEIGHT - (WINHEIGHT / 4))
 
 BGCOLOR = (255, 255, 255, 0)
 WHITE = (255, 255, 255)
@@ -51,7 +52,7 @@ MAXHEALTH = 13       # how much health to win game
 PLAYERSIZE = 20
 
 NUMROCKS = 45      # number of rocks
-NUMSOUNDS = 10     # number of sound objects
+NUMSOUNDS = 8      # number of sound objects
 SOUNDMINSPEED = 5  # slowest sound speed
 SOUNDMAXSPEED = 10 # fastest sound speed
 
@@ -132,13 +133,14 @@ def runGame():
                  'facing': UP,
                  'size': PLAYERSIZE,
                  'x': HALF_WINWIDTH,
-                 'y': HALF_WINHEIGHT,
+                 'y': QUARTER_WINHEIGHT,
                  'health': STARTHEALTH}
 
     moveLeft  = False
     moveRight = False
     moveUp    = True
     moveDown  = False
+
 
     # start off with some random rocks on the screen
     #for i in range(10):
@@ -180,10 +182,10 @@ def runGame():
             camerax = playerCenterx + CAMERASLACK - HALF_WINWIDTH
         elif playerCenterx - (camerax + HALF_WINWIDTH) > CAMERASLACK:
             camerax = playerCenterx - CAMERASLACK - HALF_WINWIDTH
-        if (cameray + HALF_WINHEIGHT) - playerCentery > CAMERASLACK:
-            cameray = playerCentery + CAMERASLACK - HALF_WINHEIGHT
-        elif playerCentery - (cameray + HALF_WINHEIGHT) > CAMERASLACK:
-            cameray = playerCentery - CAMERASLACK - HALF_WINHEIGHT
+        if (cameray + QUARTER_WINHEIGHT) - playerCentery > CAMERASLACK:
+            cameray = playerCentery + CAMERASLACK - QUARTER_WINHEIGHT
+        elif playerCentery - (cameray + QUARTER_WINHEIGHT) > CAMERASLACK:
+            cameray = playerCentery - CAMERASLACK - QUARTER_WINHEIGHT
 
         # background
         DISPLAYSURF.fill(BGCOLOR)
@@ -325,37 +327,9 @@ def runGame():
             gameOverMode = False
             DISPLAYSURF.blit(winSurf, winRect)
             DISPLAYSURF.blit(restartSurf, restartRect)
-            
+
         # game sound
-
-        if playerObj['health'] >= 3:
-            sonic_pi.send_message("/trigger/rtms_3", 1)
-            sonic_pi.send_message("/trigger/rtms_3_1", 1)
-            sonic_pi.send_message("/trigger/rtms_1", 1)
-        elif playerObj['health'] >= 2:
-            sonic_pi.send_message("/trigger/rtms_3", 0)
-            sonic_pi.send_message("/trigger/rtms_3_1", 1)
-            sonic_pi.send_message("/trigger/rtms_1", 1)
-        elif playerObj['health'] >= 1:
-            sonic_pi.send_message("/trigger/rtms_1", 1)
-            sonic_pi.send_message("/trigger/rtms_3_1", 0)
-        
-        if playerObj['health'] in range(4, 6):
-            sonic_pi.send_message("/trigger/rtms_2", 1)
-        elif playerObj['health'] > 6:
-            sonic_pi.send_message("/trigger/rtms_2", 0)
-
-        if playerObj['health'] == 5:
-            sonic_pi.send_message("/trigger/ring", [1, 0.98, 0.25])
-        elif playerObj['health'] == 6:
-            sonic_pi.send_message("/trigger/ring", [1, 0.97, 0.3])
-            sonic_pi.send_message("/trigger/guitar_scrape", 0)
-        elif playerObj['health'] == 7:
-            sonic_pi.send_message("/trigger/ring", [1, 0.96, 0.35])
-            sonic_pi.send_message("/trigger/rtms_2", 0)
-        elif playerObj['health'] == 9:
-            sonic_pi.send_message("/trigger/ring", [0, 0.98, 0.25])
-
+        playSound(playerObj)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
@@ -421,6 +395,51 @@ def isOutsideActiveArea(camerax, cameray, obj):
     boundsRect = pygame.Rect(boundsLeftEdge, boundsTopEdge, WINWIDTH * 3, WINHEIGHT * 3)
     objRect = pygame.Rect(obj['x'], obj['y'], obj['width'], obj['height'])
     return not boundsRect.colliderect(objRect)
+
+
+def playSound(playerObj):
+
+    samples = {}
+    
+    # sounds at game start
+    if playerObj['health'] >= 3:
+        samples["/trigger/rtms_3"] = 1
+        samples["/trigger/rtms_3_1"] = 1
+        samples["/trigger/rtms_1"] = 1
+    elif playerObj['health'] == 1:
+        samples["/trigger/rtms_3"] = 0
+        samples["/trigger/rtms_3_1"] = 0
+    elif playerObj['health'] == 0:
+        samples["/trigger/rtms_1"] = 1
+        
+    # sample from health 4 to 6
+    if playerObj['health'] >= 4:
+        samples["/trigger/rtms_2"] = 1
+
+    # ring sample
+    if playerObj['health'] == 5:
+        samples["/trigger/ring"] = [1, 0.98, 0.25]
+    elif playerObj['health'] == 6:
+        samples["/trigger/ring"] = [1, 0.97, 0.3]
+        samples["/trigger/guitar_scrape"] = 1
+    elif playerObj['health'] == 7:
+        samples["/trigger/ring"] = [1, 0.96, 0.35]
+        samples["/trigger/rtms_2"] = 0
+        samples["/trigger/rtms_3"] = 0
+
+    # guitar M3 sample
+    if playerObj['health'] >= 8:
+        samples["/trigger/ring"] = [0, 0.98, 0.25]
+        samples["/trigger/M3"] = [1, 0.2, -0.5]
+    if playerObj['health'] == 7:
+        samples["/trigger/M3"] = [1, 0.3, -1]
+    elif playerObj['health'] == 6:
+        samples["/trigger/M3"] = [1, 0.35, -2]
+        
+
+    for x, y in samples.items():
+        sonic_pi.send_message(x, y)
+    
 
 
 if __name__ == '__main__':
