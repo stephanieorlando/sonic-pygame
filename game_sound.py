@@ -410,11 +410,13 @@ def playSound(playerObj):
         samples["/trigger/rtms_3"] = 0
         samples["/trigger/rtms_3_1"] = 0
     elif playerObj['health'] == 0:
-        samples["/trigger/rtms_1"] = 1
+        samples["/trigger/rtms_1"] = 0
         
     # sample from health 4 to 6
-    if playerObj['health'] >= 4:
+    if playerObj['health'] in range(4, 6):
         samples["/trigger/rtms_2"] = 1
+    elif playerObj['health'] > 6:
+        samples["/trigger/rtms_2"] = 0
 
     # ring sample
     if playerObj['health'] == 5:
@@ -424,17 +426,20 @@ def playSound(playerObj):
         samples["/trigger/guitar_scrape"] = 1
     elif playerObj['health'] == 7:
         samples["/trigger/ring"] = [1, 0.96, 0.35]
-        samples["/trigger/rtms_2"] = 0
         samples["/trigger/rtms_3"] = 0
+    elif playerObj['health'] >= 8:
+        samples["/trigger/ring"] = [0, 0.98, 0.25]
+        
 
     # guitar M3 sample
-    if playerObj['health'] >= 8:
-        samples["/trigger/ring"] = [0, 0.98, 0.25]
+    if playerObj['health'] in range(8, 12):
         samples["/trigger/M3"] = [1, 0.2, -0.5]
-    if playerObj['health'] == 7:
-        samples["/trigger/M3"] = [1, 0.3, -1]
-    elif playerObj['health'] == 6:
-        samples["/trigger/M3"] = [1, 0.35, -2]
+
+    if "/trigger/M3" in samples.keys():
+        if playerObj['health'] == 7:
+            samples["/trigger/M3"] = [1, 0.3, -1]
+        elif playerObj['health'] == 6:
+            samples["/trigger/M3"] = [1, 0.35, -2]
         
 
     for x, y in samples.items():
