@@ -1,26 +1,9 @@
-# Sound Objects
+# Paper Planes and Sonic Games
+# an interactive composition and game
+# building upon code from Making Games with Python and Pygame by Al Sweigart
 
-# similar mechanisms to squirrel: moving camera, playerObj, obstacleObj, soundObjs
-
-# each sound object collided with triggers a sample in sonic pi
-# objective of game is to touch enough objects to complete the composition
-# while avoiding obstacles
-
-# if obstacles are hit, this will affect the sound/params/trigger samples to stop
-# trigger parameters such as sleep value/rate/amp?
-# recover from obstacles and continue trying to complete composition
-
-# to further work on:
-# two different shapes/colors of obj related to two preconcieved compositions
-# can eat one or both, will affect the sound that is produced
-# two compositions can also work simultaneously, will contrast somehow?
-
-# currently working on: ideal number of rocks/soundObjs and speed
-# basically want it to be enough of a challenge that it's engaging
-# experiment with different values for cameraslack?
-
-# thinking of removing 'lives' instead hitting an obstacle will change a parameter and possibly trigger a sample to stop
-
+# make game harder after player heath reaches 8?
+# more obstacles and less sound objs?
 
 import random, sys, time, pygame
 from pygame.locals import *
@@ -67,7 +50,7 @@ def main():
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINWIDTH, WINHEIGHT))
-    pygame.display.set_caption('Sounding Stars')
+    pygame.display.set_caption('Paper Planes and Sonic Games')
     BASICFONT = pygame.font.Font('freesansbold.ttf', 32)
 
     # image files
@@ -80,8 +63,8 @@ def main():
     ROCKIMAGES = []
     for i in range(1,5):
         ROCKIMAGES.append(pygame.image.load('blackhole%s.png' % i))
-    
 
+    
     while True:
         runGame()
 
@@ -96,6 +79,21 @@ def runGame():
     startMode = True
     startTime = time.time()
     healthAscending = True
+
+    samplesDict = {"/trigger/rtms_1": [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                   "/trigger/rtms_2": [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+                   "/trigger/rtms_3": [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+                   "/trigger/rtms_3_1": [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+                   "/trigger/ring": [0, 0, 0, 0, 0, [1, 0.98, 0.25], [1, 0.97, 0.3], [1, 0.96, 0.35], 0, 0, 0, 0, 0, 0],
+                   "/trigger/guitar_scrape": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                   "/trigger/guitar_M3": [0, 0, 0, 0, 0, 0, 0, 0, [1, 0.2, -0.5], [1, 0.2, -0.5], [1, 0.2, -0.5], [1, 0.2, -0.5], [1, 0.2, -0.5], 0],
+                   "/trigger/twinkle": [0, 0, 0, 0, 0, 0, 0, 0, 0, [1, -0.5, 100], [1, -0.5, 100], [1, -0.5, 100], [1, -0.5, 100], 0],
+                   "/trigger/melody": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+                   "/trigger/harmony": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [1, 60], [1, 70], [1, 70]],
+                   "/trigger/bass": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+                   "/trigger/seashells": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+                   }
+
 
     # start game screen
     startSurf = BASICFONT.render('catch the stars', True, WHITE)
@@ -140,14 +138,7 @@ def runGame():
     moveLeft  = False
     moveRight = False
     moveUp    = True
-    moveDown  = False
 
-
-    # start off with some random rocks on the screen
-    #for i in range(10):
-        #rockObjs.append(makeNewRocks(camerax, cameray))
-        #rockObjs[i]['x'] = random.randint(0, WINWIDTH)
-        #rockObjs[i]['y'] = random.randint(0, WINHEIGHT)
 
     while True: # main game loop
         
@@ -235,9 +226,6 @@ def runGame():
                     if playerObj['facing'] != UP: # change image UP
                         playerObj['surface'] = PLAYERIMG
                     playerObj['facing'] = UP
-                #elif event.key in (K_DOWN, K_s):
-                    #moveUp = False
-                    #moveDown = True
                 elif event.key in (K_LEFT, K_a):
                     moveRight = False
                     moveLeft = True
@@ -252,17 +240,6 @@ def runGame():
                     playerObj['facing'] = RIGHT
                 elif winMode and event.key == K_r:
                     return
-
-            #elif event.type == KEYUP:
-                # stop moving the player
-                #if event.key in (K_LEFT, K_a):
-                    #moveLeft = False
-                #elif event.key in (K_RIGHT, K_d):
-                    #moveRight = False
-                #elif event.key in (K_UP, K_w):
-                    #moveUp = False
-                #elif event.key in (K_DOWN, K_s):
-                    #moveDown = False
 
                 elif event.key == K_ESCAPE:
                     terminate()
@@ -332,7 +309,7 @@ def runGame():
             DISPLAYSURF.blit(restartSurf, restartRect)
 
         # game sound
-        playSound(playerObj, healthAscending)
+        playSound(playerObj['health'], samplesDict, healthAscending)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
@@ -400,99 +377,15 @@ def isOutsideActiveArea(camerax, cameray, obj):
     return not boundsRect.colliderect(objRect)
 
 
-def playSound(playerObj, healthAscending):
-
-    samples = {}
-
-    if playerObj['health'] == 3:
-        samples["/trigger/rtms_3"] = 1
-        samples["/trigger/rtms_3_1"] = 1
-        samples["/trigger/rtms_1"] = 1
-    elif playerObj['health'] == 2:
-        samples["/trigger/rtms_3"] = 0
-        samples["/trigger/rtms_3_1"] = 1
-        samples["/trigger/rtms_1"] = 1
-    elif playerObj['health'] == 1:
-        samples["/trigger/rtms_1"] = 1
-        samples["/trigger/rtms_3_1"] = 0
-    elif playerObj['health'] == 0:
-        samples["/trigger/rtms_1"] = 0
-    elif playerObj['health'] == 4:
-        samples["/trigger/rtms_3"] = 1
-        samples["/trigger/rtms_3_1"] = 1
-        samples["/trigger/rtms_2"] = 1
-        samples["/trigger/rtms_1"] = 1
-    elif playerObj['health'] == 5:
-        samples["/trigger/rtms_2"] = 1
-        samples["/trigger/rtms_3"] = 1
-        samples["/trigger/rtms_3_1"] = 1
-        samples["/trigger/rtms_1"] = 1
-        samples["/trigger/ring"] = [1, 0.98, 0.25]
-    elif playerObj['health'] == 6:
-        samples["/trigger/rtms_1"] = 1
-        samples["/trigger/rtms_2"] = 1
-        samples["/trigger/rtms_3"] = 1
-        samples["/trigger/rtms_3_1"] = 0
-        samples["/trigger/ring"] = [1, 0.97, 0.3]
-        samples["/trigger/guitar_scrape"] = 1
-        if not healthAscending:
-            samples["/trigger/M3"] = [1, 0.35, -2]
-            samples["/trigger/rtms_1"] = 1
-            samples["/trigger/rtms_2"] = 1
-            samples["/trigger/rtms_3"] = 1
-    elif playerObj['health'] == 7:
-        samples["/trigger/rtms_1"] = 1
-        samples["/trigger/rtms_2"] = 0
-        samples["/trigger/rtms_3"] = 1
-        samples["/trigger/rtms_3_1"] = 1
-        samples["/trigger/ring"] = [1, 0.96, 0.35]
-        if not healthAscending:
-            samples["/trigger/M3"] = [1, 0.3, -1]
-            samples["/trigger/rtms_1"] = 1
-            samples["/trigger/rtms_3"] = 1
-            samples["/trigger/rtms_3_1"] = 1
-    elif playerObj['health'] == 8:
-        samples["/trigger/ring"] = [0, 0.98, 0.25]
-        samples["/trigger/M3"] = [1, 0.2, -0.5]
-        samples["/trigger/rtms_3_1"] = 1
-        samples["/trigger/rtms_3"] = 1
-        samples["/trigger/rtms_1"] = 1
-    elif playerObj['health'] == 9:
-        samples["/trigger/M3"] = [1, 0.2, -0.5]
-        samples["/trigger/twinkle"] = [1, -0.5, 100]
-        samples["/trigger/rtms_3_1"] = 0
-        samples["/trigger/rtms_3"] = 0
-    elif playerObj['health'] == 10:
-        samples["/trigger/M3"] = [1, 0.2, -0.5]
-        samples["/trigger/twinkle"] = [1, -0.5, 100]
-        samples["/trigger/bass"] = 1
-        samples["/trigger/rtms_1"] = 1
-    elif playerObj['health'] == 11:
-         samples["/trigger/M3"] = [1, 0.2, -0.5]
-         samples["/trigger/twinkle"] = [1, -0.5, 100]
-         samples["/trigger/harmony"] = [1, 60]
-         samples["/trigger/bass"] = 1
-         samples["/trigger/rtms_1"] = 0
-    elif playerObj['health'] == 12:
-        samples["/trigger/M3"] = [1, 0.2, -0.5]
-        samples["/trigger/twinkle"] = [1, -0.5, 100]
-        samples["/trigger/harmony"] = [1, 70]
-        samples["/trigger/melody"] = 1
-        samples["/trigger/bass"] = 1
-    elif playerObj['health'] == 13:
-        samples["/trigger/M3"] = [0, 0.2, -0.5]
-        samples["/trigger/twinkle"] = [0, -0.5, 100]
-        samples["/trigger/harmony"] = [1, 70]
-        samples["/trigger/melody"] = 1
-        samples["/trigger/bass"] = 1
-        samples["/trigger/seashells"] = 1
-        
-
-
+def playSound(currentHealth, samplesDict, healthAscending):
+  
     # send osc messages
-    for x, y in samples.items():
-        sonic_pi.send_message(x, y)
-    
+    for x, y in samplesDict.items():
+        if y[currentHealth] != 0:
+            sonic_pi.send_message(x, y[currentHealth])
+
+    # still need to incorporate healthAscending
+    # considering making a counter for highest health
 
 
 if __name__ == '__main__':
