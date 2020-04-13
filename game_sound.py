@@ -31,11 +31,10 @@ INVULNTIME = 2       # how long the player is invulnerable after being hit in se
 GAMEOVERTIME = 4     # how long the "game over" text stays on the screen in seconds
 STARTSCREENTIME = 2  # how long the start instructions stay on the screen
 STARTHEALTH = 3      # how much health the player starts with
+PLAYERDAMAGE = 0     #damage
 MAXHEALTH = 13       # how much health to win game
 PLAYERSIZE = 20
 
-NUMROCKS = 45      # number of rocks
-NUMSOUNDS = 7      # number of sound objects
 SOUNDMINSPEED = 5  # slowest sound speed
 SOUNDMAXSPEED = 10 # fastest sound speed
 
@@ -80,18 +79,18 @@ def runGame():
     startTime = time.time()
     healthAscending = True
 
-    samplesDict = {"/trigger/rtms_1": [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-                   "/trigger/rtms_2": [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-                   "/trigger/rtms_3": [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-                   "/trigger/rtms_3_1": [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-                   "/trigger/ring": [0, 0, 0, 0, 0, [1, 0.98, 0.25], [1, 0.97, 0.3], [1, 0.96, 0.35], 0, 0, 0, 0, 0, 0],
-                   "/trigger/guitar_scrape": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                   "/trigger/guitar_M3": [0, 0, 0, 0, 0, 0, 0, 0, [1, 0.2, -0.5], [1, 0.2, -0.5], [1, 0.2, -0.5], [1, 0.2, -0.5], [1, 0.2, -0.5], 0],
-                   "/trigger/twinkle": [0, 0, 0, 0, 0, 0, 0, 0, 0, [1, -0.5, 100], [1, -0.5, 100], [1, -0.5, 100], [1, -0.5, 100], 0],
-                   "/trigger/melody": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-                   "/trigger/harmony": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [1, 60], [1, 70], [1, 70]],
-                   "/trigger/bass": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
-                   "/trigger/seashells": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+    samplesDict = {"/trigger/rtms_1": [0, 1, [1, 1, 1], [1, 1, 1], [1, 1, 1], 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                   "/trigger/rtms_2": [0, 0, [0, 0, 0], [0, 0, 0], [1, 1, 1], 1, 1, 0, 0, 0, 0, 0, 0, 0],
+                   "/trigger/rtms_3": [0, 0, [0, 0, 0], [1, 1, 1], [1, 1, 1], 1, 1, 1, 1, 0, 0, 0, 0, 0],
+                   "/trigger/rtms_3_1": [0, 0, [1, 1, 1], [1, 1, 1], [1, 1, 1], 1, 1, 1, 1, 0, 0, 0, 0, 0],
+                   "/trigger/ring": [0, 0, [0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 0.98, 0.25], [1, 0.97, 0.3], [1, 0.96, 0.35], 0, 0, 0, 0, 0, 0],
+                   "/trigger/guitar_scrape": [0, 0, [0, 0, 0], [0, 0, 0], [0, 0, 0], 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                   "/trigger/guitar_M3": [0, 0, [0, 0, 0], [0, 0, 0], [0, 0, 0], 0, 0, 0, [1, 0.2, -0.5], [1, 0.2, -0.5], [1, 0.2, -0.5], [1, 0.2, -0.5], [1, 0.2, -0.5], 0],
+                   "/trigger/twinkle": [0, 0, [0, 0, 0], [0, 0, 0], [0, 0, 0], 0, 0, 0, 0, [1, -0.5, 100], [1, -0.5, 100], [1, -0.5, 100], [1, -0.5, 100], 0],
+                   "/trigger/melody": [0, 0, [0, 0, 0], [0, 0, 0], [0, 0, 0], 0, 0, 0, 0, 0, 0, 0, 1, 1],
+                   "/trigger/harmony": [0, 0, [0, 0, 0], [0, 0, 0], [0, 0, 0], 0, 0, 0, 0, 0, 0, [1, 60], [1, 70], [1, 70]],
+                   "/trigger/bass": [0, 0, [0, 0, 0], [0, 0, 0], [0, 0, 0], 0, 0, 0, 0, 0, 1, 1, 1, 1],
+                   "/trigger/seashells": [0, 0, [0, 0, 1], [0, 1, 1], [0, 0, 0], 0, 0, 0, 0, 0, 0, 0, 0, 1]
                    }
 
 
@@ -133,7 +132,11 @@ def runGame():
                  'size': PLAYERSIZE,
                  'x': HALF_WINWIDTH,
                  'y': QUARTER_WINHEIGHT,
-                 'health': STARTHEALTH}
+                 'health': STARTHEALTH,
+                 'damage': PLAYERDAMAGE}
+
+    numSounds = 10 - (playerObj['health'] // 2)
+    numRocks = 45 + ((playerObj['health'] - 1) // 2)
 
     moveLeft  = False
     moveRight = False
@@ -161,9 +164,9 @@ def runGame():
                 del soundObjs[i]
 
         # add more rocks and sounds if not enough
-        while len(rockObjs) < NUMROCKS:
+        while len(rockObjs) < numRocks:
             rockObjs.append(makeNewRocks(camerax, cameray))
-        while len(soundObjs) < NUMSOUNDS:
+        while len(soundObjs) < numSounds:
             soundObjs.append(makeNewSounds(camerax, cameray))
 
         # adjust camera slack
@@ -252,8 +255,6 @@ def runGame():
                 playerObj['x'] += MOVERATE
             if moveUp:
                 playerObj['y'] -= MOVERATE
-            if moveDown:
-                playerObj['y'] += MOVERATE
 
             # check if the player has collided with any soundobjs and delete
             for i in range(len(soundObjs)-1, -1, -1):
@@ -262,7 +263,8 @@ def runGame():
                     del soundObjs[i]
                     if not winMode:
                         playerObj['health'] += 1
-                        healthAscending = True
+                        if playerObj['damage'] != 0:
+                            playerObj['damage'] -= 1
 
                     if playerObj['facing'] == UP:
                         playerObj['surface'] = PLAYERIMG
@@ -284,8 +286,8 @@ def runGame():
                         invulnerableStartTime = time.time()
                         if not winMode:
                             playerObj['health'] -= 1
-                            healthAscending = False
-
+                            playerObj['damage'] += 1
+                            print(playerObj['damage'])
                         if playerObj['health'] == 0:
                             gameOverMode = True 
                             gameOverStartTime = time.time()
@@ -309,7 +311,7 @@ def runGame():
             DISPLAYSURF.blit(restartSurf, restartRect)
 
         # game sound
-        playSound(playerObj['health'], samplesDict, healthAscending)
+        playSound(playerObj['health'], playerObj['damage'], samplesDict)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
@@ -377,12 +379,12 @@ def isOutsideActiveArea(camerax, cameray, obj):
     return not boundsRect.colliderect(objRect)
 
 
-def playSound(currentHealth, samplesDict, healthAscending):
+def playSound(currentHealth, currentDamage, samplesDict):
   
     # send osc messages
     for x, y in samplesDict.items():
-        if y[currentHealth] != 0:
-            sonic_pi.send_message(x, y[currentHealth])
+        if y[currentHealth][currentDamage] != 0:
+            sonic_pi.send_message(x, y[currentHealth][currentDamage])
 
     # still need to incorporate healthAscending
     # considering making a counter for highest health
