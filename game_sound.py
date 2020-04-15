@@ -28,7 +28,7 @@ INVULNTIME = 2       # how long the player is invulnerable after being hit in se
 GAMEOVERTIME = 4     # how long the "game over" text stays on the screen in seconds
 STARTSCREENTIME = 2  # how long the start instructions stay on the screen
 STARTHEALTH = 3      # how much health the player starts with
-PLAYERDAMAGE = 0     #damage
+PLAYERDAMAGE = 0     # variable for damage counter
 MAXHEALTH = 13       # how much health to win game
 PLAYERSIZE = 20
 
