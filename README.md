@@ -8,5 +8,4 @@ Achieving the maximum health will complete the composition.
 
 To get started, copy the sonic_pi_game_sound file into a new buffer in Sonic Pi. Update the directory variable with your computer's file path. Run the buffer. Open the game_sound file and run. Enjoy the game.
 
-Maintained by Stephanie Orlando
-Contact at stephaniejulieorlando@gmail.com
+Maintained by Stephanie Orlando contact at stephaniejulieorlando@gmail.com
