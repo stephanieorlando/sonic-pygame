@@ -308,7 +308,7 @@ def runGame():
             DISPLAYSURF.blit(restartSurf, restartRect)
 
         # game sound
-        playSound(playerObj['health'], playerObj['damage'], samplesDict)
+        playSound(playerObj['health'], playerObj['damage'], playerObj['facing'], samplesDict)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
@@ -376,9 +376,19 @@ def isOutsideActiveArea(camerax, cameray, obj):
     return not boundsRect.colliderect(objRect)
 
 
-def playSound(currentHealth, currentDamage, samplesDict):
+def playSound(currentHealth, currentDamage, playerFacing, samplesDict):
+
+    # direction osc messages
+    if playerFacing == UP:
+        direction_value = [100.1, 8750, 0]
+    elif playerFacing == LEFT:
+        direction_value = [99.7, 8000, -0.6]
+    elif playerFacing == RIGHT:
+        direction_value = [99.9, 8500, 0.6]
+
+    sonic_pi.send_message("/trigger/direction", direction_value)
   
-    # send osc messages
+    # health osc messages
     for x, y in samplesDict.items():
         if y[currentHealth][currentDamage] != 0:
             sonic_pi.send_message(x, y[currentHealth][currentDamage])

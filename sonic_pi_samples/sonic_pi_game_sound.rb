@@ -14,6 +14,19 @@ use_real_time
 use_debug false
 use_osc_logging false
 
+# pitch 99.7, 99.9, 100.1
+# pan left -0.6, right 0.6, centre 0
+# fx bitcrusher sample_rate: 8000, 8500, 8750
+
+live_loop :direction do
+  dx = sync "/osc*/trigger/direction"
+  with_fx :bitcrusher, sample_rate: dx[1], bits: 12, cutoff: 100 do
+    use_synth :sine
+    play dx[0], amp: 0.08, attack: 0.2, sustain: 0.8, pan: dx[2]
+    sleep 0.8
+  end
+end
+
 # starting rate- 0.25, amp: 1.5 w/ reverb and pitch shift
 # hit obstacles- pitch: from 2 to 0.5
 
