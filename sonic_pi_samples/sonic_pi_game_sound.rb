@@ -1,12 +1,14 @@
 # paper planes and sonic games
 
-rtms_1 = "/users/orlando1723/Documents/sonic_pi/pygame_samples/rtms1.wav"
-rtms_2 = "/users/orlando1723/Documents/sonic_pi/pygame_samples/rtms2.wav"
-rtms_3 = "/users/orlando1723/Documents/sonic_pi/pygame_samples/rtms3.wav"
-guitar_scrape = "/users/orlando1723/Documents/sonic_pi/pygame_samples/guitar_scrape.wav"
-guitar_M3 = "/users/orlando1723/Documents/sonic_pi/pygame_samples/guitar_M3.wav"
-guitar_microtonal = "/users/orlando1723/Documents/sonic_pi/pygame_samples/guitar_microtonal.wav"
-seashells = "/users/orlando1723/Documents/sonic_pi/pygame_samples/seashells.wav"
+dir = # string of your file path here
+
+rtms_1 = dir + "sonic_pi_samples/rtms1.wav"
+rtms_2 = dir + "sonic_pi_samples/rtms2.wav"
+rtms_3 = dir + "sonic_pi_samples/rtms3.wav"
+guitar_scrape = dir + "sonic_pi_samples/guitar_scrape.wav"
+guitar_M3 = dir + "sonic_pi_samples/guitar_M3.wav"
+guitar_microtonal = dir + "sonic_pi_samples/guitar_microtonal.wav"
+seashells = dir + "sonic_pi_samples/seashells.wav"
 
 use_real_time
 use_debug false
