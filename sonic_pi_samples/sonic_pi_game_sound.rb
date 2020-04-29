@@ -1,7 +1,7 @@
 # paper planes and sonic games
 
 dir = # string of your file path here
-
+  
 rtms_1 = dir + "sonic_pi_samples/rtms1.wav"
 rtms_2 = dir + "sonic_pi_samples/rtms2.wav"
 rtms_3 = dir + "sonic_pi_samples/rtms3.wav"
@@ -20,9 +20,9 @@ use_osc_logging false
 
 live_loop :direction do
   dx = sync "/osc*/trigger/direction"
-  with_fx :bitcrusher, sample_rate: dx[1], bits: 12, cutoff: 100 do
+  with_fx :bitcrusher, sample_rate: dx[1], bits: 12, cutoff: 90 do
     use_synth :sine
-    play dx[0], amp: 0.08, attack: 0.2, sustain: 0.8, pan: dx[2]
+    play dx[0], amp: 0.06, attack: 0.2, sustain: 0.8, pan: dx[2]
     sleep 0.8
   end
 end
